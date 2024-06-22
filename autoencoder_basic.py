@@ -13,8 +13,7 @@ def read_dataset(n_samples):
 
 def main():
     LATENT_SIZE = 10
-    X = read_dataset(500)[:, :, :2]
-    X = X.reshape((500, 720))
+    X = np.load('data_registered.npy')
     min_val = np.min(X, axis=1).reshape((X.shape[0], 1))
     max_val = np.max(X, axis=1).reshape((X.shape[0], 1))
     X = (X - min_val) / (max_val - min_val) # [0, 1]
@@ -44,14 +43,16 @@ def main():
          optimizer="adam",
          loss=keras.losses.MeanSquaredError(),
     )
-    model.fit(X, X, epochs=10)
+    model.fit(X, X, epochs=10, shuffle=True)
     test_sample_index = np.random.randint(0, X.shape[0])
     test_sample = X[test_sample_index]
     
     pred = model.predict(np.array([test_sample]))
+    
+    # scale back both sample and result
     pred = pred[0] * (max_val[test_sample_index] - min_val[test_sample_index]) + min_val[test_sample_index]
-    np.save('generated_data/pred_dense.npy', pred)
     test_sample = test_sample * (max_val[test_sample_index] - min_val[test_sample_index]) + min_val[test_sample_index]
+    np.save('generated_data/pred_dense.npy', pred)
     np.save('generated_data/test_sample_dense.npy', test_sample)
 
 if __name__ == "__main__":
