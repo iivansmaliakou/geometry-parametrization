@@ -33,7 +33,7 @@ def main():
         Dense(100, activation='relu', use_bias=True),
         Dense(200, activation='relu', use_bias=True),
         Dense(500, activation='relu', use_bias=True),
-        Dense(X.shape[1], activation='relu', use_bias=True),
+        Dense(X.shape[1], activation='linear', use_bias=True),
     ])
     input = keras.Input(shape=(720,))
     latent_vector = encoder(input)
@@ -43,7 +43,7 @@ def main():
          optimizer="adam",
          loss=keras.losses.MeanSquaredError(),
     )
-    model.fit(X, X, epochs=10, shuffle=True)
+    model.fit(X, X, epochs=10)
     test_sample_index = np.random.randint(0, X.shape[0])
     test_sample = X[test_sample_index]
     
