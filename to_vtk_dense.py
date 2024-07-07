@@ -1,7 +1,6 @@
 import numpy as np
 
 pred = np.load('./generated_data/pred_dense.npy')
-pred = pred.reshape((360, 2))
 pred_file = open("./generated_data/pred_dense.vtk", "w")
 pred_file.write('# vtk DataFile Version 2.0\n')
 pred_file.write('rawdata, Created by Gmsh\n')
@@ -14,7 +13,6 @@ pred_file.close()
 
 
 test_sample = np.load('./generated_data/test_sample_dense.npy')
-test_sample = test_sample.reshape(360, 2)
 test_sample_file = open("./generated_data/test_sample_dense.vtk", "w")
 test_sample_file.write('# vtk DataFile Version 2.0\n')
 test_sample_file.write('rawdata, Created by Gmsh\n')

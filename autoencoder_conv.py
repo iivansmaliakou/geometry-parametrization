@@ -4,6 +4,7 @@ from tensorflow.keras.layers import Dense, Input, Flatten,\
 from tensorflow.keras.models import Model, Sequential
 import numpy as np
 from tensorflow import keras
+from matplotlib import pyplot as plt
 
 def read_dataset(n_samples):
     ret = []
@@ -12,24 +13,29 @@ def read_dataset(n_samples):
     return np.array(ret)
 
 def normalize(X: np.array):
-    X = X.reshape((X.shape[0] * int(X.shape[1] / 2), 2))
-    min_val = np.min(X, axis=0).reshape((2, 1))
-    max_val = np.max(X, axis=0).reshape((2, 1))
-    X = (X.T - min_val) / (max_val - min_val)
+    X = X.reshape((X.shape[0] * X.shape[1], 2))
+    min_val = np.min(X, axis=0).reshape(1, 2)
+    max_val = np.max(X, axis=0).reshape(1, 2)
+    X = (X.T - min_val.T) / (max_val - min_val).T
     X = X.T
-    X = X.reshape(500, 360, 2)
+    X = X.reshape((500, 360, 2))
     return X, min_val, max_val
 
-def denormalize_one(X: np.array, min, max):
-    X = X.reshape((X.shape[0] * X.shape[1], 2))
-    X = (X.T * (max - min)) + min
-    X = X.T
-    X = X.reshape(1, 720)
+def denormalize(X: np.array, min, max):
+    X = (X * (max - min)) + min
     return X
 
 def main():
     X = np.load('data_registered.npy')
+    X = X.reshape((500, 360, 2), order='F')
     X, min_val, max_val = normalize(X)
+    train_size = int(X.shape[0] * 0.8)
+    test_size = X.shape[0] - train_size
+    X_train_idx = np.random.choice([True, False], size=X.shape[0],
+                       replace=True, p=[0.8, 0.2])
+    X_train = X[X_train_idx]
+    X_test = X[np.invert(X_train_idx)]
+
     encoder = Sequential([
         Conv1D(256, 5, activation='relu', padding='same'),
         MaxPooling1D(2, padding='same'),
@@ -54,7 +60,7 @@ def main():
         UpSampling1D(2),
         Conv1D(256, 5, activation='relu', padding='same'),
         UpSampling1D(2),
-        Conv1D(2, 3, activation='linear', padding='same') 
+        Conv1D(X.shape[-1], 3, activation='linear', padding='same') 
     ])
     input = keras.Input(shape=(360, 2))
     latent_vector = encoder(input)
@@ -64,13 +70,14 @@ def main():
          optimizer="adam",
          loss=keras.losses.MeanSquaredError(),
     )
-    model.fit(X, X, epochs=50)
-    test_sample = X[np.random.randint(0, X.shape[0])]
+    print(model.summary())
+    model.fit(X_train, X_train, epochs=40)
+    test_sample = X_test[np.random.randint(0, X_test.shape[0])]
     pred = model.predict(np.array([test_sample]))
-    pred = denormalize_one(pred, min_val, max_val)
-    test_sample = denormalize_one(np.array([test_sample]), min_val, max_val)
-    np.save('generated_data/pred_conv.npy', pred)
-    np.save('generated_data/test_sample_conv.npy', test_sample)
+    pred = denormalize(pred, min_val, max_val)
+    test_sample = denormalize(np.array([test_sample]), min_val, max_val)
+    np.save('generated_data/pred_conv.npy', pred[0])
+    np.save('generated_data/test_sample_conv.npy', test_sample[0])
 
 if __name__ == "__main__":
     main()
