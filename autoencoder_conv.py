@@ -78,10 +78,10 @@ def main():
     test_sample = denormalize(np.array([test_sample]), min_val, max_val)
     np.save('generated_data/pred_conv.npy', pred[0])
     np.save('generated_data/test_sample_conv.npy', test_sample[0])
-    
+      
     # calculate loss
     X_test_pred = model.predict(X_test)
-    mse_test = mean_squared_error(X_test, X_test_pred)
-    print(f'mse is {mse_test}')
+    mse_test = mean_squared_error(X_test.reshape(X_test.shape[0], -1), X_test_pred.reshape(X_test_pred.shape[0], -1))
+    print(f'mse for convolutional autoencoder is {mse_test}')
 if __name__ == "__main__":
     main()
