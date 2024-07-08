@@ -2,6 +2,7 @@ from tensorflow.keras.layers import Dense, Input, Flatten,\
                                     Reshape, LeakyReLU as LR,\
                                     Activation, Dropout, Conv1D, MaxPooling1D, UpSampling1D
 from tensorflow.keras.models import Model, Sequential
+from sklearn.metrics import mean_squared_error
 import numpy as np
 from tensorflow import keras
 from matplotlib import pyplot as plt
@@ -26,8 +27,7 @@ def denormalize(X: np.array, min, max):
     return X
 
 def main():
-    X = np.load('data_registered.npy')
-    X = X.reshape((500, 360, 2), order='F')
+    X = np.load('reg_boundary.npy')
     X, min_val, max_val = normalize(X)
     train_size = int(X.shape[0] * 0.8)
     test_size = X.shape[0] - train_size
@@ -78,6 +78,10 @@ def main():
     test_sample = denormalize(np.array([test_sample]), min_val, max_val)
     np.save('generated_data/pred_conv.npy', pred[0])
     np.save('generated_data/test_sample_conv.npy', test_sample[0])
-
+    
+    # calculate loss
+    X_test_pred = model.predict(X_test)
+    mse_test = mean_squared_error(X_test, X_test_pred)
+    print(f'mse is {mse_test}')
 if __name__ == "__main__":
     main()
