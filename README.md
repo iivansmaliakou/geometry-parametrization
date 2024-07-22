@@ -11,3 +11,6 @@ Autoencoder (data with surface registration):
 
 Convolutional autoencoder (data with surface registration):
 ![Generated and original geometries](conv_autoencoder_result.png)
+
+Graph neural network (data with surface registration):
+![Generated and original geometries](graph-nn-res.png)
