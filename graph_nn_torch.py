@@ -83,7 +83,7 @@ def evaluate(model, X, conn):
     # plt.show()
 
 def main():
-    reg_boundary = np.load('reg_boundary.npy').reshape((500, 360, 2), order='F') # (500, 360, 2)
+    reg_boundary = np.load('npy_data/reg_boundary.npy').reshape((500, 360, 2), order='F') # (500, 360, 2)
     train_size = int(reg_boundary.shape[0] * TRAIN_PROPORTION)
     X_train_idx = np.random.choice(reg_boundary.shape[0], train_size, replace=False)
     X_train = reg_boundary[X_train_idx]

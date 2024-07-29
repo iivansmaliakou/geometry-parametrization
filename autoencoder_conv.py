@@ -27,7 +27,7 @@ def denormalize(X: np.array, min, max):
     return X
 
 def main():
-    X = np.load('reg_boundary.npy')
+    X = np.load('npy_data/reg_boundary.npy')
     X, min_val, max_val = normalize(X)
     train_size = int(X.shape[0] * 0.8)
     test_size = X.shape[0] - train_size
