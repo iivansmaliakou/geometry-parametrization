@@ -7,18 +7,19 @@ from torch import nn
 import numpy as np
 import matplotlib.pyplot as plt
 
-TRAIN_ITERS=1000
+TRAIN_ITERS = 1000
 TRAIN_PROPORTION=0.8
 DEVICE = torch.device("mps")
 
 # returns tensor of shape [2, 2*num_nodes-2] 
+# [720, 2]
 def edge_idxs(n):
     ret = []
-    ret.extend([[0, n-1],[0, 1]]) # first is connected to the last
-    for i in range(2, n-2):
-        ret.append([i, i+2])
-        ret.append([i, i-2])
-    ret.extend([[n-1, n-2], [n-1, 0]]) # last is connected to the first
+    #ret.append([0, n-1]) # first is connected to the last
+    for i in range(n-1):
+        ret.append([i, i+1])
+        #ret.append([i, i-1])
+    ret.append([n-1, 0]) # last is connected to the first
     return torch.tensor(ret, dtype=torch.long).t()
 
 def make_graphs(X, conns):
@@ -74,16 +75,16 @@ def evaluate(model, X, conn):
     np.save('generated_data/pred_graph.npy', generated_np)
     np.save('generated_data/test_sample_graph.npy', orig_np)
     # lines below are for the instant visualization
-    # fig_fantasy = plt.figure('fantasy')
-    # nx.draw(to_networkx(Data(X_generated, edge_index=conn)), node_size=10, pos=get_pos(X_generated))
-    # fig_fantasy.show()
-    # fig_orig = plt.figure('original')
-    # nx.draw(to_networkx(X[rand_idx]), node_size=10, pos=get_pos(X[rand_idx].x), with_labels=True)
-    # fig_orig.show()
-    # plt.show()
+    fig_fantasy = plt.figure('fantasy')
+    nx.draw(to_networkx(Data(X_generated, edge_index=conn)), node_size=10, pos=get_pos(X_generated))
+    fig_fantasy.show()
+    fig_orig = plt.figure('original')
+    nx.draw(to_networkx(X[rand_idx]), node_size=10, pos=get_pos(X[rand_idx].x), with_labels=True)
+    fig_orig.show()
+    plt.show()
 
 def main():
-    reg_boundary = np.load('npy_data/reg_boundary.npy').reshape((500, 360, 2), order='F') # (500, 360, 2)
+    reg_boundary = np.load('npy_data/reg_boundary.npy') #.reshape((500, 360, 2), order='F') # (500, 360, 2)
     train_size = int(reg_boundary.shape[0] * TRAIN_PROPORTION)
     X_train_idx = np.random.choice(reg_boundary.shape[0], train_size, replace=False)
     X_train = reg_boundary[X_train_idx]
